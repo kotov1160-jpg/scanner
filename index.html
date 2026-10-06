@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сканер треугольного арбитража Bybit — бесплатная демо-версия</title>
+<meta name="description" content="Бесплатный онлайн-сканер треугольного арбитража на Bybit: проверяет все спотовые пары, показывает прибыль до и после комиссий. Работает в браузере, без регистрации.">
+<!-- Яндекс Метрика: вставь сюда код счётчика из metrika.yandex.ru -->
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#2a3342;--text:#e6edf3;--muted:#8b98a9;
+    --good:#2ee59d;--bad:#ff5d6c;--warn:#ffb547;--blue:#33b5ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  .pill{padding:3px 10px;border-radius:999px;font-size:12px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .pill.on{background:var(--good);color:#04140d;border-color:var(--good)}
+  .pill.err{background:var(--bad);color:#fff;border-color:var(--bad)}
+  main{max-width:1500px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+  .controls label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .controls label.chk{flex-direction:row;align-items:center;gap:6px;color:var(--text);font-size:13px}
+  input,select{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:7px 9px;font:inherit;width:120px}
+  label.chk input{width:auto}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+  button:hover{border-color:var(--blue)}
+  button.primary{background:var(--good);color:#04140d;border-color:var(--good);font-weight:600}
+  button.danger{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  .stat{background:var(--panel2);border-radius:8px;padding:10px 12px}
+  .stat .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .v.good{color:var(--good)} .v.bad{color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  tbody tr.row{cursor:pointer}
+  tbody tr.row:hover{background:var(--panel2)}
+  .path{font-weight:600;white-space:nowrap}
+  .legs{font-size:12px;color:var(--muted)}
+  .g{color:var(--good)} .b{color:var(--bad)} .w{color:var(--warn)}
+  .num{text-align:right;white-space:nowrap}
+  .detail td{background:#11161e;font-size:13px}
+  .detail table td,.detail table th{border-bottom:1px dashed var(--line);padding:5px 8px}
+  .hint{font-size:12px;color:var(--muted)}
+  .tablewrap{max-height:70vh;overflow:auto}
+  details summary{cursor:pointer;color:var(--blue)}
+  details p,details li{color:var(--muted);font-size:13px}
+  .empty{padding:20px;text-align:center;color:var(--muted)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:#ffb547;color:#2a1a00;margin-left:6px;vertical-align:middle}
+  label.locked{opacity:.55;cursor:not-allowed}
+  tr.locked td{filter:blur(4px);user-select:none;pointer-events:none}
+  .lockrow td{text-align:center;padding:14px;color:var(--text);background:#1a2130}
+  .cta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.cta{grid-template-columns:1fr}}
+  .cta .card h3{margin:0 0 6px;font-size:17px}
+  .cta .card p{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .cta a.btn{display:inline-block;text-decoration:none;padding:10px 16px;border-radius:7px;font-weight:700}
+  .cta a.tg{background:#2aabee;color:#fff}
+  .cta a.pro{background:var(--good);color:#04140d}
+  .cta ul{margin:0 0 12px;padding-left:18px;color:var(--muted);font-size:13px}
+  footer{max-width:1500px;margin:0 auto;padding:6px 16px 30px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔺 Треугольный арбитраж · Bybit Spot <span class="badge">ДЕМО</span></h1>
+  <span id="status" class="pill">остановлен</span>
+  <span id="updated" class="pill">данных ещё нет</span>
+</header>
+
+<main>
+  <section class="card">
+    <div class="controls">
+      <label>Стартовая монета
+        <select id="start"><option>USDT</option><option>USDC</option><option>BTC</option><option>ETH</option></select>
+      </label>
+      <label>Сумма сделки<input id="amount" type="number" min="1" step="10"></label>
+      <label>Комиссия за шаг, %<input id="fee" type="number" min="0" step="0.01"></label>
+      <label>Мин. оборот пары 24ч, $<input id="minVol" type="number" min="0" step="10000"></label>
+      <label>Мин. прибыль после ком., %<input id="minNet" type="number" step="0.01"></label>
+      <label>Обновление, сек<input id="interval" type="number" min="30" step="5" title="В демо — не чаще раза в 30 секунд"></label>
+      <label class="chk"><input type="checkbox" id="legs3"> 3 шага</label>
+      <label class="chk locked" title="Доступно в полной версии"><input type="checkbox" id="legs4" disabled> 4 шага <span class="badge">PRO</span></label>
+      <label class="chk"><input type="checkbox" id="onlyNet"> только в плюс после комиссий</label>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button id="runBtn" class="primary">▶ Старт автообновления</button>
+      <button id="onceBtn">Сканировать один раз</button>
+    </div>
+    <div class="hint" style="margin-top:8px">Демо-версия: 3 шага, топ-3 цепочки, обновление не чаще раза в 30 секунд. Публичные данные Bybit, ключи не нужны. Цены — лучшие заявки в стакане (bid/ask). Нажми на строку, чтобы увидеть расчёт по шагам.</div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="v" id="sPairs">—</div><div class="k">торговых пар</div></div>
+    <div class="stat"><div class="v" id="sCycles">—</div><div class="k">цепочек проверено</div></div>
+    <div class="stat"><div class="v good" id="sGross">—</div><div class="k">в плюс ДО комиссий</div></div>
+    <div class="stat"><div class="v" id="sNet">—</div><div class="k">в плюс ПОСЛЕ комиссий</div></div>
+    <div class="stat"><div class="v" id="sBest">—</div><div class="k">лучшая после комиссий</div></div>
+    <div class="stat"><div class="v" id="sTime">—</div><div class="k">время запроса к бирже</div></div>
+  </section>
+
+  <section class="card">
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Цепочка</th><th class="num">До комиссий</th><th class="num">После комиссий</th>
+          <th class="num">Макс. объём*</th><th class="num">Итог на сумму</th><th class="num">Держится</th>
+        </tr></thead>
+        <tbody id="tbody"><tr><td colspan="7" class="empty">Нажми «Сканировать один раз» или «Старт».</td></tr></tbody>
+      </table>
+    </div>
+    <div class="hint" style="margin-top:8px">* Макс. объём — сколько стартовой монеты можно провести по цепочке, не выходя за лучшую заявку ни на одном шаге. «Держится» — сколько обновлений подряд цепочка остаётся в списке.</div>
+  </section>
+
+  <section class="cta">
+    <div class="card">
+      <h3>📡 Сигналы каждый час — бесплатно</h3>
+      <p>Бот сам сканирует Bybit, Binance и OKX и публикует аномалии фандинга и расхождения цен в Telegram.</p>
+      <a class="btn tg" id="tgLink" target="_blank" rel="noopener">Открыть Telegram-канал</a>
+    </div>
+    <div class="card">
+      <h3>🔓 Полная версия сканера</h3>
+      <ul>
+        <li>Треугольники <b>и четырёхугольники</b></li>
+        <li>Все найденные цепочки, а не топ-3</li>
+        <li>Обновление каждые 5 секунд</li>
+      </ul>
+      <a class="btn pro" id="proLink" target="_blank" rel="noopener">Подробнее о полной версии</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Как читать результаты</summary>
+      <ul>
+        <li><b>До комиссий</b> — чистая несогласованность цен: сколько процентов даёт круг, если бы биржа не брала плату.</li>
+        <li><b>После комиссий</b> — то же самое за вычетом комиссии на каждом шаге (по умолчанию 0,1% тейкера; поменяй под свой уровень).</li>
+        <li><b>Итог на сумму</b> — симуляция с реальными ограничениями Bybit: округление до шага лота и минимальный размер ордера. ⚠ значит, что какой-то шаг не пройдёт.</li>
+        <li>Цены берутся одним снимком тикеров, но стакан меняется непрерывно: к моменту отправки ордеров окно может уже закрыться. Это нормально и как раз показывает, насколько быстро рынок выравнивает цены.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+<footer>Сканер показывает расхождения цен на момент запроса и не является инвестиционной рекомендацией. Окна закрываются за доли секунды; учитывайте комиссии, ликвидность и риск исполнения. Данные: публичный API Bybit.</footer>
+
+<script>
+// ======================== НАСТРОЙКИ ДЕМО ========================
+const TG_URL  = "https://t.me/kissan_radarbot";   // ссылка на Telegram-канал
+const PRO_URL = TG_URL;                           // ссылка на страницу полной версии (пока ведёт в канал)
+const DEMO_TOP = 3;                               // сколько цепочек показывать
+const DEMO_MIN_INTERVAL = 30;                     // минимальный интервал обновления, сек
+
+// ======================== Ядро (без DOM) ========================
+const API = "https://api.bybit.com";
+const num = x => { const v = parseFloat(x); return Number.isFinite(v) ? v : 0; };
+const floorStep = (x, step) => step > 0 ? Math.floor(x / step + 1e-9) * step : x;
+
+async function getJSON(path, params) {
+  const r = await fetch(API + path + (params ? "?" + new URLSearchParams(params) : ""));
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  if (j.retCode !== 0) throw new Error(j.retMsg || "ошибка Bybit");
+  return j.result;
+}
+
+async function loadInstruments() {
+  const map = {};
+  let cursor = "";
+  for (let i = 0; i < 10; i++) {
+    const p = { category: "spot" };
+    if (cursor) p.cursor = cursor;
+    const res = await getJSON("/v5/market/instruments-info", p);
+    for (const it of res.list || []) {
+      if (it.status !== "Trading") continue;
+      const lf = it.lotSizeFilter || {};
+      map[it.symbol] = { base: it.baseCoin, quote: it.quoteCoin,
+        baseStep: num(lf.basePrecision), minQty: num(lf.minOrderQty), minAmt: num(lf.minOrderAmt) };
+    }
+    cursor = res.nextPageCursor || "";
+    if (!cursor) break;
+  }
+  return map;
+}
+
+async function loadTickers() {
+  const res = await getJSON("/v5/market/tickers", { category: "spot" });
+  const map = {};
+  for (const t of res.list || []) map[t.symbol] = t;
+  return map;
+}
+
+// Оборот пары в долларах (turnover24h считается в котируемой монете)
+function usdPrice(coin, tickers) {
+  if (coin === "USDT" || coin === "USDC") return 1;
+  for (const q of ["USDT", "USDC"]) {
+    const t = tickers[coin + q];
+    if (t && num(t.lastPrice) > 0) return num(t.lastPrice);
+  }
+  return 0;
+}
+
+// Граф: из монеты в монету через пару. sell: base→quote по bid; buy: quote→base по ask.
+function buildGraph(instr, tickers, minVolUsd) {
+  const edges = {};
+  let pairs = 0;
+  const add = (from, e) => (edges[from] = edges[from] || []).push(e);
+  for (const [sym, info] of Object.entries(instr)) {
+    const t = tickers[sym];
+    if (!t) continue;
+    const bid = num(t.bid1Price), ask = num(t.ask1Price), bidSz = num(t.bid1Size), askSz = num(t.ask1Size);
+    if (!(bid > 0 && ask > 0 && ask >= bid)) continue;
+    if (minVolUsd > 0) {
+      const usd = num(t.turnover24h) * usdPrice(info.quote, tickers);
+      if (usd < minVolUsd) continue;
+    }
+    pairs++;
+    if (bidSz > 0) add(info.base, { to: info.quote, sym, side: "sell", price: bid, rate: bid, cap: bidSz, info });
+    if (askSz > 0) add(info.quote, { to: info.base, sym, side: "buy", price: ask, rate: 1 / ask, cap: askSz * ask, info });
+  }
+  return { edges, pairs };
+}
+
+function evalCycle(path, feeK) {
+  let gross = 1, cum = 1, maxStart = Infinity;
+  for (const e of path) {
+    maxStart = Math.min(maxStart, e.cap / cum);  // ограничение шага в единицах стартовой монеты
+    cum *= e.rate;
+    gross *= e.rate;
+  }
+  return { path, gross: gross - 1, net: gross * Math.pow(feeK, path.length) - 1, maxStart };
+}
+
+function findCycles(graph, start, use3, use4, feeK) {
+  const E = graph.edges, out = [];
+  let checked = 0;
+  for (const e1 of E[start] || []) {
+    const a = e1.to;
+    if (a === start) continue;
+    for (const e2 of E[a] || []) {
+      const b = e2.to;
+      if (b === start || b === a) continue;
+      for (const e3 of E[b] || []) {
+        if (use3 && e3.to === start) { checked++; out.push(evalCycle([e1, e2, e3], feeK)); continue; }
+        if (!use4) continue;
+        const c = e3.to;
+        if (c === start || c === a || c === b) continue;
+        for (const e4 of E[c] || []) {
+          if (e4.to !== start) continue;
+          checked++;
+          out.push(evalCycle([e1, e2, e3, e4], feeK));
+        }
+      }
+    }
+  }
+  return { cycles: out, checked };
+}
+
+// Симуляция на конкретную сумму с округлением до шага лота и проверкой минимумов
+function simulate(path, amount, feeK) {
+  let amt = amount, warn = "";
+  const steps = [];
+  for (const e of path) {
+    const i = e.info, before = amt;
+    let qty, got;
+    if (e.side === "sell") {
+      qty = floorStep(amt, i.baseStep);
+      if (qty < i.minQty) warn = warn || `${e.sym}: меньше мин. ордера`;
+      if (qty * e.price < i.minAmt) warn = warn || `${e.sym}: сумма меньше минимума`;
+      got = qty * e.price * feeK;
+    } else {
+      qty = floorStep(amt / e.price, i.baseStep);
+      if (qty < i.minQty) warn = warn || `${e.sym}: меньше мин. ордера`;
+      if (qty * e.price < i.minAmt) warn = warn || `${e.sym}: сумма меньше минимума`;
+      got = qty * feeK;
+    }
+    // cap: для продажи — в базовой монете, для покупки — в котируемой
+    const need = e.side === "sell" ? qty : qty * e.price;
+    if (need > e.cap) warn = warn || `${e.sym}: не хватает объёма в лучшей заявке`;
+    steps.push({ e, before, qty, got });
+    amt = got;
+  }
+  return { final: amt, profit: amt - amount, warn, steps };
+}
+
+// ======================== Интерфейс ========================
+if (typeof document !== "undefined") (function () {
+  const $ = id => document.getElementById(id);
+  const KEY = "triArbDemoCfg";
+  const DEF = { start: "USDT", amount: 100, fee: 0.1, minVol: 50000, minNet: -0.5, interval: 30,
+    legs3: true, legs4: false, onlyNet: false };
+  const BOOL = ["legs3", "legs4", "onlyNet"];
+
+  function load() {
+    let s = {};
+    try { s = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+    const c = Object.assign({}, DEF, s);
+    for (const k in DEF) BOOL.includes(k) ? ($(k).checked = !!c[k]) : ($(k).value = c[k]);
+  }
+  function cfg() {
+    const c = {};
+    for (const k in DEF) {
+      if (BOOL.includes(k)) c[k] = $(k).checked;
+      else if (k === "start") c[k] = $(k).value;
+      else { const v = parseFloat($(k).value); c[k] = Number.isFinite(v) ? v : DEF[k]; }
+    }
+    c.interval = Math.max(DEMO_MIN_INTERVAL, c.interval);
+    c.legs3 = true; c.legs4 = false;
+    return c;
+  }
+  document.querySelectorAll("input,select").forEach(el => el.addEventListener("change", () => {
+    try { localStorage.setItem(KEY, JSON.stringify(cfg())); } catch (e) {}
+    if (lastData) render();
+  }));
+
+  let instruments = null, lastData = null, running = false, timer = null, busy = false, round = 0;
+  const alive = {};  // ключ цепочки → {first, count, lastRound}
+  const openRows = new Set();
+
+  const fmtPct = v => (v >= 0 ? "+" : "") + (v * 100).toFixed(3) + "%";
+  const fmtAmt = (v, coin) => {
+    const d = coin === "BTC" ? 6 : coin === "ETH" ? 5 : 2;
+    return (Number.isFinite(v) ? v.toFixed(d) : "∞") + " " + coin;
+  };
+  const keyOf = path => path.map(e => e.sym + ":" + e.side).join(">");
+  const sideRu = s => s === "buy" ? "купить" : "продать";
+
+  async function scan() {
+    if (busy) return;
+    busy = true;
+    try {
+      const t0 = performance.now();
+      if (!instruments) instruments = await loadInstruments();
+      const tickers = await loadTickers();
+      lastData = { tickers, ms: Math.round(performance.now() - t0), at: new Date() };
+      round++;
+      render(true);
+      $("updated").textContent = "обновлено " + lastData.at.toLocaleTimeString("ru-RU");
+      if (running) { $("status").textContent = "автообновление"; $("status").className = "pill on"; }
+    } catch (e) {
+      $("status").textContent = "ошибка: " + e.message;
+      $("status").className = "pill err";
+    } finally {
+      busy = false;
+    }
+  }
+
+  function render(newRound) {
+    const c = cfg(), feeK = 1 - c.fee / 100;
+    const graph = buildGraph(instruments, lastData.tickers, c.minVol);
+    const { cycles, checked } = findCycles(graph, c.start, c.legs3, c.legs4, feeK);
+    const grossPos = cycles.filter(x => x.gross > 0).length;
+    const netPos = cycles.filter(x => x.net > 0).length;
+
+    let list = cycles.filter(x => x.gross > 0 && x.net * 100 >= c.minNet);
+    if (c.onlyNet) list = list.filter(x => x.net > 0);
+    list.sort((a, b) => b.net - a.net);
+    const totalFound = list.length;
+    list = list.slice(0, 60);
+
+    if (newRound) {
+      for (const x of list) {
+        const k = keyOf(x.path);
+        const a = alive[k];
+        if (a && a.lastRound === round - 1) { a.count++; a.lastRound = round; }
+        else alive[k] = { first: Date.now(), count: 1, lastRound: round };
+      }
+      for (const k in alive) if (alive[k].lastRound < round - 1) delete alive[k];
+    }
+
+    $("sPairs").textContent = graph.pairs;
+    $("sCycles").textContent = checked.toLocaleString("ru-RU");
+    $("sGross").textContent = grossPos;
+    $("sNet").textContent = netPos;
+    $("sNet").className = "v " + (netPos ? "good" : "bad");
+    const best = cycles.reduce((m, x) => x.net > m ? x.net : m, -Infinity);
+    $("sBest").textContent = Number.isFinite(best) ? fmtPct(best) : "—";
+    $("sBest").className = "v " + (best > 0 ? "good" : "bad");
+    $("sTime").textContent = lastData.ms + " мс";
+
+    const tb = $("tbody");
+    if (!list.length) {
+      tb.innerHTML = `<tr><td colspan="7" class="empty">Цепочек по фильтрам нет. Попробуй снизить «Мин. прибыль после ком.» или оборот.</td></tr>`;
+      return;
+    }
+    const rows = [];
+    list.forEach((x, i) => {
+      const k = keyOf(x.path);
+      const coins = [c.start, ...x.path.map(e => e.to)].join(" → ");
+      const legs = x.path.map(e => `${e.sym} ${sideRu(e.side)}`).join(" · ");
+      const sim = simulate(x.path, c.amount, feeK);
+      const a = alive[k];
+      const held = a ? `${a.count} обн. (${Math.round((Date.now() - a.first) / 1000)} с)` : "—";
+      rows.push(`<tr class="row" data-k="${k}">
+        <td>${i + 1}</td>
+        <td><div class="path">${coins}</div><div class="legs">${legs}</div></td>
+        <td class="num g">${fmtPct(x.gross)}</td>
+        <td class="num ${x.net > 0 ? "g" : "b"}">${fmtPct(x.net)}</td>
+        <td class="num">${fmtAmt(x.maxStart, c.start)}</td>
+        <td class="num ${sim.profit > 0 ? "g" : "b"}">${(sim.profit >= 0 ? "+" : "") + fmtAmt(sim.profit, c.start)}${sim.warn ? ` <span class="w" title="${sim.warn}">⚠</span>` : ""}</td>
+        <td class="num">${held}</td></tr>`);
+      if (openRows.has(k)) rows.push(detailRow(x, sim, c));
+    });
+    // демо: оставляем первые DEMO_TOP цепочек, остальные — размыты
+    const visible = [];
+    let shown = 0;
+    for (const r of rows) {
+      if (r.startsWith("<tr class=\"row\"")) shown++;
+      if (shown <= DEMO_TOP) visible.push(r);
+    }
+    const hidden = Math.max(0, totalFound - DEMO_TOP);
+    if (hidden > 0) {
+      for (let i = 0; i < Math.min(2, hidden); i++)
+        visible.push(`<tr class="locked"><td>${DEMO_TOP + i + 1}</td><td><div class="path">USDT → XXX → YYY → USDT</div><div class="legs">скрыто в демо-версии</div></td><td class="num">+0.000%</td><td class="num">−0.000%</td><td class="num">0.00 USDT</td><td class="num">0.00 USDT</td><td class="num">—</td></tr>`);
+      visible.push(`<tr class="lockrow"><td colspan="7">🔒 Ещё ${hidden} цеп. по вашим фильтрам — в полной версии. <a href="${PRO_URL}" target="_blank" rel="noopener" style="color:#2ee59d">Подробнее</a></td></tr>`);
+    }
+    tb.innerHTML = visible.join("");
+    tb.querySelectorAll("tr.row").forEach(tr => tr.onclick = () => {
+      const k = tr.dataset.k;
+      openRows.has(k) ? openRows.delete(k) : openRows.add(k);
+      render();
+    });
+  }
+
+  function detailRow(x, sim, c) {
+    const lines = sim.steps.map((s, i) => {
+      const e = s.e;
+      const from = i === 0 ? c.start : x.path[i - 1].to;
+      return `<tr><td>${i + 1}</td><td>${e.sym}</td><td>${sideRu(e.side)}</td>
+        <td class="num">${e.price}</td>
+        <td class="num">${s.before.toPrecision(8)} ${from}</td>
+        <td class="num">${s.got.toPrecision(8)} ${e.to}</td>
+        <td class="num">${e.side === "sell" ? e.cap + " " + e.info.base : (e.cap / e.price).toPrecision(6) + " " + e.info.base}</td></tr>`;
+    }).join("");
+    return `<tr class="detail"><td></td><td colspan="6">
+      <table><thead><tr><th>Шаг</th><th>Пара</th><th>Действие</th><th class="num">Цена</th>
+      <th class="num">Отдаём</th><th class="num">Получаем (после ком.)</th><th class="num">Объём в лучшей заявке</th></tr></thead>
+      <tbody>${lines}</tbody></table>
+      <div class="hint" style="margin-top:6px">Итог: ${c.amount} ${c.start} → ${sim.final.toPrecision(8)} ${c.start}
+      (${(sim.profit >= 0 ? "+" : "") + sim.profit.toFixed(4)}). ${sim.warn ? "⚠ " + sim.warn : ""}</div>
+    </td></tr>`;
+  }
+
+  function start() {
+    running = true;
+    $("runBtn").textContent = "■ Стоп"; $("runBtn").className = "danger";
+    $("status").textContent = "автообновление"; $("status").className = "pill on";
+    scan();
+    timer = setInterval(scan, cfg().interval * 1000);
+  }
+  function stop() {
+    running = false; clearInterval(timer);
+    $("runBtn").textContent = "▶ Старт автообновления"; $("runBtn").className = "primary";
+    $("status").textContent = "остановлен"; $("status").className = "pill";
+  }
+  $("runBtn").onclick = () => running ? stop() : start();
+  $("onceBtn").onclick = scan;
+  $("interval").addEventListener("change", () => { if (running) { stop(); start(); } });
+
+  $("tgLink").href = TG_URL;
+  $("proLink").href = PRO_URL;
+  load();
+  $("legs3").checked = true; $("legs3").disabled = true;
+  if (parseFloat($("interval").value) < DEMO_MIN_INTERVAL) $("interval").value = DEMO_MIN_INTERVAL;
+})();
+</script>
+</body>
+</html>
