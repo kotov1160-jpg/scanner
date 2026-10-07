@@ -13,6 +13,9 @@
   body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
   header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
   header h1{font-size:18px;margin:0;font-weight:600}
+  nav{margin-left:auto;display:flex;gap:14px;font-size:13px}
+  nav a{color:var(--muted);text-decoration:none}
+  nav a.on,nav a:hover{color:var(--text)}
   .pill{padding:3px 10px;border-radius:999px;font-size:12px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
   .pill.on{background:var(--good);color:#04140d;border-color:var(--good)}
   .pill.err{background:var(--bad);color:#fff;border-color:var(--bad)}
@@ -69,6 +72,7 @@
   <h1>🔺 Треугольный арбитраж · Bybit Spot <span class="badge">ДЕМО</span></h1>
   <span id="status" class="pill">остановлен</span>
   <span id="updated" class="pill">данных ещё нет</span>
+  <nav><a href="./" class="on">Треугольный арбитраж</a><a href="cross.html">Межбиржевой</a><a href="fees.html">Калькулятор комиссий</a></nav>
 </header>
 
 <main>

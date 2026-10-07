@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Межбиржевой сканер Bybit, Binance, OKX — бесплатная демо-версия</title>
+<meta name="description" content="Бесплатный онлайн-сканер межбиржевого арбитража: сравнивает цены монет на Bybit, Binance и OKX и показывает разницу до и после комиссий. Работает в браузере, без регистрации.">
+<!-- Яндекс Метрика: вставь сюда код счётчика из metrika.yandex.ru -->
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#2a3342;--text:#e6edf3;--muted:#8b98a9;
+    --good:#2ee59d;--bad:#ff5d6c;--warn:#ffb547;--blue:#33b5ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  nav{margin-left:auto;display:flex;gap:14px;font-size:13px}
+  nav a{color:var(--muted);text-decoration:none}
+  nav a.on,nav a:hover{color:var(--text)}
+  .pill{padding:3px 10px;border-radius:999px;font-size:12px;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .pill.on{background:var(--good);color:#04140d;border-color:var(--good)}
+  .pill.err{background:var(--bad);color:#fff;border-color:var(--bad)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:#ffb547;color:#2a1a00;margin-left:6px;vertical-align:middle}
+  main{max-width:1500px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+  .controls label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .controls label.chk{flex-direction:row;align-items:center;gap:6px;color:var(--text);font-size:13px}
+  label.locked{opacity:.55;cursor:not-allowed}
+  input{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:7px 9px;font:inherit;width:120px}
+  label.chk input{width:auto}
+  input:focus{outline:none;border-color:var(--blue)}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+  button:hover{border-color:var(--blue)}
+  button.primary{background:var(--good);color:#04140d;border-color:var(--good);font-weight:600}
+  button.danger{background:var(--bad);color:#fff;border-color:var(--bad);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  .stat{background:var(--panel2);border-radius:8px;padding:10px 12px}
+  .stat .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .v.good{color:var(--good)} .v.bad{color:var(--bad)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  .num{text-align:right;white-space:nowrap}
+  .g{color:var(--good)} .b{color:var(--bad)} .w{color:var(--warn)}
+  .sym{font-weight:700}
+  .sub{font-size:12px;color:var(--muted)}
+  .tablewrap{max-height:70vh;overflow:auto}
+  tr.locked td{filter:blur(4px);user-select:none;pointer-events:none}
+  .lockrow td{text-align:center;padding:14px;background:#1a2130}
+  .hint{font-size:12px;color:var(--muted)}
+  .empty{padding:20px;text-align:center;color:var(--muted)}
+  .exst{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+  .cta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.cta{grid-template-columns:1fr}}
+  .cta .card h3{margin:0 0 6px;font-size:17px}
+  .cta .card p{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .cta ul{margin:0 0 12px;padding-left:18px;color:var(--muted);font-size:13px}
+  .cta a.btn{display:inline-block;text-decoration:none;padding:10px 16px;border-radius:7px;font-weight:700}
+  .cta a.tg{background:#2aabee;color:#fff}
+  .cta a.pro{background:var(--good);color:#04140d}
+  details summary{cursor:pointer;color:var(--blue)}
+  details li{color:var(--muted);font-size:13px}
+  footer{max-width:1500px;margin:0 auto;padding:6px 16px 30px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔄 Межбиржевой сканер · Bybit · Binance · OKX <span class="badge">ДЕМО</span></h1>
+  <span id="status" class="pill">остановлен</span>
+  <span id="updated" class="pill">данных ещё нет</span>
+  <nav><a href="./">Треугольный арбитраж</a><a href="cross.html" class="on">Межбиржевой</a><a href="fees.html">Калькулятор комиссий</a></nav>
+</header>
+
+<main>
+  <section class="card">
+    <div class="controls">
+      <label>Сумма сделки, USDT<input id="amount" type="number" min="10" step="10"></label>
+      <label>Комиссия тейкера, %<input id="fee" type="number" min="0" step="0.01"></label>
+      <label>Комиссия за вывод, USDT<input id="wdFee" type="number" min="0" step="0.1" title="Примерная стоимость перевода монеты между биржами"></label>
+      <label>Мин. оборот 24ч, $<input id="minVol" type="number" min="0" step="50000"></label>
+      <label>Обновление, сек<input id="interval" type="number" min="30" step="5" title="В демо — не чаще раза в 30 секунд"></label>
+      <label class="chk"><input type="checkbox" id="hideSus"> скрывать разницу больше 5%</label>
+      <label class="chk locked" title="Доступно в полной версии"><input type="checkbox" disabled> фьючерсы <span class="badge">PRO</span></label>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button id="runBtn" class="primary">▶ Старт автообновления</button>
+      <button id="onceBtn">Сканировать один раз</button>
+    </div>
+    <div class="hint" style="margin-top:8px">Демо-версия: спот, топ-3 монеты, обновление не чаще раза в 30 секунд. Сравниваются лучшие цены в стаканах (купить по ask на одной бирже, продать по bid на другой). Ключи не нужны.</div>
+    <div class="exst" id="exst"></div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="v" id="sCommon">—</div><div class="k">монет есть на 2+ биржах</div></div>
+    <div class="stat"><div class="v good" id="sGross">—</div><div class="k">разница в плюс ДО расходов</div></div>
+    <div class="stat"><div class="v" id="sFee">—</div><div class="k">в плюс после комиссий</div></div>
+    <div class="stat"><div class="v" id="sNet">—</div><div class="k">в плюс после комиссий и вывода</div></div>
+    <div class="stat"><div class="v" id="sSus">—</div><div class="k">подозрительно больших (&gt;5%)</div></div>
+    <div class="stat"><div class="v" id="sTime">—</div><div class="k">время запроса к биржам</div></div>
+  </section>
+
+  <section class="card">
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Монета</th><th>Купить</th><th>Продать</th>
+          <th class="num">Разница</th><th class="num">После комиссий</th><th class="num">После вывода</th>
+          <th class="num">Объём в лучших заявках</th><th class="num">Итог на сумму</th>
+        </tr></thead>
+        <tbody id="tbody"><tr><td colspan="9" class="empty">Нажми «Сканировать один раз» или «Старт».</td></tr></tbody>
+      </table>
+    </div>
+    <div class="hint" style="margin-top:8px">«После вывода» — с учётом фиксированной комиссии за перевод монеты (поле выше) на твою сумму. «Объём в лучших заявках» — сколько долларов можно провести, не сдвинув цену ни на одной бирже. ⚠ — разница больше 5%: чаще всего это закрытые депозиты/выводы или разные токены с одинаковым тикером.</div>
+  </section>
+
+  <section class="cta">
+    <div class="card">
+      <h3>📡 Сигналы каждый час — бесплатно</h3>
+      <p>Бот сам сканирует Bybit, Binance и OKX и публикует аномалии фандинга и расхождения цен в Telegram.</p>
+      <a class="btn tg" id="tgLink" target="_blank" rel="noopener">Открыть Telegram-канал</a>
+    </div>
+    <div class="card">
+      <h3>🔓 Полная версия сканера</h3>
+      <ul>
+        <li>Спот <b>и бессрочные фьючерсы</b></li>
+        <li>Все монеты, а не топ-3</li>
+        <li>Расчёт по глубине стакана (VWAP) на твою сумму</li>
+        <li>Проверка общих сетей вывода и их комиссий</li>
+      </ul>
+      <a class="btn pro" id="proLink" target="_blank" rel="noopener">Подробнее о полной версии</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Как читать результаты</summary>
+      <ul>
+        <li><b>Разница</b> — на сколько цена продажи на одной бирже выше цены покупки на другой, без учёта расходов.</li>
+        <li><b>После комиссий</b> — минус комиссия тейкера на покупку и на продажу.</li>
+        <li><b>После вывода</b> — ещё минус перевод монеты между биржами. Для маленьких сумм именно он съедает всё.</li>
+        <li>Перевод занимает от минут до часа, и за это время разница обычно исчезает. Поэтому профессионалы держат деньги заранее на обеих биржах и выравнивают остатки потом.</li>
+        <li>Огромная разница почти всегда означает, что ввод или вывод монеты на одной из бирж закрыт, и забрать её невозможно.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+<footer>Сканер показывает расхождения цен на момент запроса и не является инвестиционной рекомендацией. Учитывайте комиссии, время перевода, ликвидность и риски бирж. Данные: публичные API Bybit, Binance, OKX.</footer>
+
+<script>
+// ======================== НАСТРОЙКИ ДЕМО ========================
+const TG_URL  = "https://t.me/kissan_radarbot";
+const PRO_URL = TG_URL;
+const DEMO_TOP = 3;
+const DEMO_MIN_INTERVAL = 30;
+const SUS_LIMIT = 0.05;   // разница больше 5% — подозрительная
+
+// ======================== Ядро ========================
+const num = x => { const v = parseFloat(x); return Number.isFinite(v) ? v : 0; };
+async function getJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+async function fetchBybit() {
+  const j = await getJSON("https://api.bybit.com/v5/market/tickers?category=spot");
+  if (j.retCode !== 0) throw new Error(j.retMsg);
+  const out = {};
+  for (const t of j.result.list) {
+    if (!t.symbol.endsWith("USDT")) continue;
+    out[t.symbol.slice(0, -4)] = { bid: num(t.bid1Price), ask: num(t.ask1Price), bidSz: num(t.bid1Size), askSz: num(t.ask1Size), vol: num(t.turnover24h) };
+  }
+  return out;
+}
+async function fetchBinance() {
+  const [book, day] = await Promise.all([
+    getJSON("https://api.binance.com/api/v3/ticker/bookTicker"),
+    getJSON("https://api.binance.com/api/v3/ticker/24hr?type=MINI"),
+  ]);
+  const vol = {};
+  for (const d of day) vol[d.symbol] = num(d.quoteVolume);
+  const out = {};
+  for (const b of book) {
+    if (!b.symbol.endsWith("USDT")) continue;
+    out[b.symbol.slice(0, -4)] = { bid: num(b.bidPrice), ask: num(b.askPrice), bidSz: num(b.bidQty), askSz: num(b.askQty), vol: vol[b.symbol] || 0 };
+  }
+  return out;
+}
+async function fetchOKX() {
+  const j = await getJSON("https://www.okx.com/api/v5/market/tickers?instType=SPOT");
+  const out = {};
+  for (const t of j.data || []) {
+    if (!t.instId.endsWith("-USDT")) continue;
+    out[t.instId.slice(0, -5)] = { bid: num(t.bidPx), ask: num(t.askPx), bidSz: num(t.bidSz), askSz: num(t.askSz), vol: num(t.volCcy24h) };
+  }
+  return out;
+}
+const EX = { Bybit: fetchBybit, Binance: fetchBinance, OKX: fetchOKX };
+
+// Для каждой монеты: где дешевле купить (min ask) и где дороже продать (max bid) — на разных биржах
+function analyze(data, c) {
+  const feeK = 1 - c.fee / 100;
+  const coins = {};
+  for (const [ex, d] of Object.entries(data))
+    for (const [coin, q] of Object.entries(d)) {
+      if (!(q.bid > 0 && q.ask > 0 && q.ask >= q.bid)) continue;
+      if (c.minVol > 0 && q.vol < c.minVol) continue;
+      (coins[coin] = coins[coin] || []).push({ ex, ...q });
+    }
+  const res = [];
+  let common = 0;
+  for (const [coin, qs] of Object.entries(coins)) {
+    if (qs.length < 2) continue;
+    common++;
+    let best = null;
+    for (const buy of qs) for (const sell of qs) {
+      if (buy.ex === sell.ex) continue;
+      const gross = sell.bid / buy.ask - 1;
+      if (!best || gross > best.gross) best = { coin, buy, sell, gross };
+    }
+    if (!best) continue;
+    const afterFee = (1 + best.gross) * feeK * feeK - 1;
+    const depth = Math.min(best.buy.askSz * best.buy.ask, best.sell.bidSz * best.sell.bid);
+    const qty = c.amount / best.buy.ask * feeK;          // купили и заплатили комиссию
+    const qtyArrived = qty - c.wdFee / best.buy.ask;      // вывод: фикс. комиссия в монетах ~ wdFee USDT
+    const final = Math.max(0, qtyArrived) * best.sell.bid * feeK;
+    const afterWd = final / c.amount - 1;
+    res.push({ ...best, afterFee, afterWd, depth, profit: final - c.amount, sus: best.gross > SUS_LIMIT });
+  }
+  return { res, common };
+}
+
+// ======================== Интерфейс ========================
+if (typeof document !== "undefined") (function () {
+  const $ = id => document.getElementById(id);
+  const KEY = "crossDemoCfg";
+  const DEF = { amount: 100, fee: 0.1, wdFee: 1, minVol: 100000, interval: 30, hideSus: true };
+  function load() {
+    let s = {}; try { s = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+    const c = Object.assign({}, DEF, s);
+    for (const k in DEF) k === "hideSus" ? ($(k).checked = !!c[k]) : ($(k).value = c[k]);
+  }
+  function cfg() {
+    const c = {};
+    for (const k in DEF) {
+      if (k === "hideSus") c[k] = $(k).checked;
+      else { const v = parseFloat($(k).value); c[k] = Number.isFinite(v) ? v : DEF[k]; }
+    }
+    c.interval = Math.max(DEMO_MIN_INTERVAL, c.interval);
+    c.amount = Math.max(1, c.amount);
+    return c;
+  }
+  document.querySelectorAll("input").forEach(el => el.addEventListener("change", () => {
+    try { localStorage.setItem(KEY, JSON.stringify(cfg())); } catch (e) {}
+    if (last) render();
+  }));
+
+  let last = null, running = false, timer = null, busy = false;
+  const pct = v => (v >= 0 ? "+" : "") + (v * 100).toFixed(3) + "%";
+  const px = p => String(+p.toPrecision(6));
+  const usd = v => (v >= 1e6 ? (v / 1e6).toFixed(1) + " млн" : v >= 1e3 ? (v / 1e3).toFixed(1) + " тыс" : v.toFixed(0)) + " $";
+
+  async function scan() {
+    if (busy) return; busy = true;
+    const t0 = performance.now(), data = {}, st = [];
+    await Promise.all(Object.entries(EX).map(async ([n, f]) => {
+      try { data[n] = await f(); st.push(`<span class="g">● ${n}: ${Object.keys(data[n]).length} пар</span>`); }
+      catch (e) { st.push(`<span class="b">● ${n}: нет данных (${e.message})</span>`); }
+    }));
+    $("exst").innerHTML = st.join("");
+    busy = false;
+    if (Object.keys(data).length < 2) {
+      $("status").textContent = "мало бирж ответило"; $("status").className = "pill err"; return;
+    }
+    last = { data, ms: Math.round(performance.now() - t0) };
+    $("updated").textContent = "обновлено " + new Date().toLocaleTimeString("ru-RU");
+    if (running) { $("status").textContent = "автообновление"; $("status").className = "pill on"; }
+    render();
+  }
+
+  function render() {
+    const c = cfg();
+    const { res, common } = analyze(last.data, c);
+    const gross = res.filter(x => x.gross > 0).length;
+    const fee = res.filter(x => x.afterFee > 0 && !x.sus).length;
+    const net = res.filter(x => x.afterWd > 0 && !x.sus).length;
+    const sus = res.filter(x => x.sus).length;
+    $("sCommon").textContent = common;
+    $("sGross").textContent = gross;
+    $("sFee").textContent = fee; $("sFee").className = "v " + (fee ? "good" : "bad");
+    $("sNet").textContent = net; $("sNet").className = "v " + (net ? "good" : "bad");
+    $("sSus").textContent = sus; $("sSus").className = "v " + (sus ? "" : "good");
+    $("sTime").textContent = last.ms + " мс";
+
+    let list = res.filter(x => x.gross > 0 && (!c.hideSus || !x.sus));
+    list.sort((a, b) => b.afterWd - a.afterWd);
+    const total = list.length;
+    const tb = $("tbody");
+    if (!total) { tb.innerHTML = `<tr><td colspan="9" class="empty">Разницы в плюс нет. Попробуй снизить «Мин. оборот».</td></tr>`; return; }
+    const rows = list.slice(0, DEMO_TOP).map((x, i) => `<tr>
+      <td>${i + 1}</td>
+      <td><span class="sym">${x.coin}</span>${x.sus ? ' <span class="w" title="Разница больше 5%: проверь, открыт ли ввод/вывод">⚠</span>' : ""}<div class="sub">оборот: ${usd(Math.min(x.buy.vol, x.sell.vol))}</div></td>
+      <td>${x.buy.ex}<div class="sub">${px(x.buy.ask)}</div></td>
+      <td>${x.sell.ex}<div class="sub">${px(x.sell.bid)}</div></td>
+      <td class="num g">${pct(x.gross)}</td>
+      <td class="num ${x.afterFee > 0 ? "g" : "b"}">${pct(x.afterFee)}</td>
+      <td class="num ${x.afterWd > 0 ? "g" : "b"}">${pct(x.afterWd)}</td>
+      <td class="num">${usd(x.depth)}</td>
+      <td class="num ${x.profit > 0 ? "g" : "b"}">${(x.profit >= 0 ? "+" : "") + x.profit.toFixed(2)} USDT${x.depth < c.amount ? ' <span class="w" title="Объём в лучших заявках меньше суммы сделки">⚠</span>' : ""}</td></tr>`);
+    const hidden = total - DEMO_TOP;
+    if (hidden > 0) {
+      for (let i = 0; i < Math.min(2, hidden); i++)
+        rows.push(`<tr class="locked"><td>${DEMO_TOP + i + 1}</td><td>XXX</td><td>Биржа</td><td>Биржа</td><td class="num">+0.000%</td><td class="num">+0.000%</td><td class="num">+0.000%</td><td class="num">0 $</td><td class="num">0.00</td></tr>`);
+      rows.push(`<tr class="lockrow"><td colspan="9">🔒 Ещё ${hidden} монет с разницей в плюс — в полной версии. <a href="${PRO_URL}" target="_blank" rel="noopener" style="color:#2ee59d">Подробнее</a></td></tr>`);
+    }
+    tb.innerHTML = rows.join("");
+  }
+
+  function start() {
+    running = true; $("runBtn").textContent = "■ Стоп"; $("runBtn").className = "danger";
+    $("status").textContent = "автообновление"; $("status").className = "pill on";
+    scan(); timer = setInterval(scan, cfg().interval * 1000);
+  }
+  function stop() {
+    running = false; clearInterval(timer);
+    $("runBtn").textContent = "▶ Старт автообновления"; $("runBtn").className = "primary";
+    $("status").textContent = "остановлен"; $("status").className = "pill";
+  }
+  $("runBtn").onclick = () => running ? stop() : start();
+  $("onceBtn").onclick = scan;
+  $("interval").addEventListener("change", () => { if (running) { stop(); start(); } });
+  $("tgLink").href = TG_URL; $("proLink").href = PRO_URL;
+  load();
+  if (parseFloat($("interval").value) < DEMO_MIN_INTERVAL) $("interval").value = DEMO_MIN_INTERVAL;
+})();
+</script>
+</body>
+</html>

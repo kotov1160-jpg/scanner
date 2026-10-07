@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор комиссий Bybit, Binance, OKX — сколько вы отдаёте бирже</title>
+<meta name="description" content="Бесплатный калькулятор торговых комиссий Bybit, Binance и OKX: сколько стоит одна сделка, день и месяц торговли на споте и фьючерсах с учётом плеча, мейкер/тейкер и спреда.">
+<!-- Яндекс Метрика: вставь сюда код счётчика из metrika.yandex.ru -->
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--line:#2a3342;--text:#e6edf3;--muted:#8b98a9;
+    --good:#2ee59d;--bad:#ff5d6c;--warn:#ffb547;--blue:#33b5ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header h1{font-size:18px;margin:0;font-weight:600}
+  nav{margin-left:auto;display:flex;gap:14px;font-size:13px;flex-wrap:wrap}
+  nav a{color:var(--muted);text-decoration:none}
+  nav a.on,nav a:hover{color:var(--text)}
+  main{max-width:1200px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+  .controls label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+  .controls label.chk{flex-direction:row;align-items:center;gap:6px;color:var(--text);font-size:13px}
+  input,select{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:7px 9px;font:inherit;width:130px}
+  label.chk input{width:auto}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  input[type=range]{width:180px;padding:0}
+  .seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .seg button{background:var(--panel2);color:var(--muted);border:0;padding:8px 16px;font:inherit;cursor:pointer}
+  .seg button.on{background:var(--good);color:#04140d;font-weight:700}
+  .big{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .stat{background:var(--panel2);border-radius:8px;padding:12px 14px}
+  .stat .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .stat .k{font-size:12px;color:var(--muted)}
+  .v.bad{color:var(--bad)} .v.warn{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font-size:12px;color:var(--muted);font-weight:600}
+  .num{text-align:right;white-space:nowrap}
+  tr.best td{background:#10291f}
+  .tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--good);color:#04140d;margin-left:6px}
+  .bar{height:8px;border-radius:4px;background:var(--bad);margin-top:6px;opacity:.8}
+  .hint{font-size:12px;color:var(--muted)}
+  .rates td,.rates th{padding:6px 8px;font-size:13px}
+  .cta{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.cta{grid-template-columns:1fr}}
+  .cta h3{margin:0 0 6px;font-size:17px}
+  .cta p{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .cta a.btn{display:inline-block;text-decoration:none;padding:10px 16px;border-radius:7px;font-weight:700}
+  .cta a.tg{background:#2aabee;color:#fff}
+  .cta a.sc{background:var(--good);color:#04140d}
+  footer{max-width:1200px;margin:0 auto;padding:6px 16px 30px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧮 Калькулятор комиссий · Bybit · Binance · OKX</h1>
+  <nav><a href="./">Треугольный арбитраж</a><a href="cross.html">Межбиржевой</a><a href="fees.html" class="on">Калькулятор комиссий</a></nav>
+</header>
+
+<main>
+  <section class="card">
+    <div class="controls">
+      <label>Рынок
+        <div class="seg" id="mkt"><button data-v="spot" class="on">Спот</button><button data-v="fut">Фьючерсы</button></div>
+      </label>
+      <label>Размер сделки (ваши деньги), $<input id="size" type="number" min="1" step="100"></label>
+      <label id="levWrap">Плечо, x<input id="lev" type="number" min="1" max="125" step="1"></label>
+      <label>Сделок в день (вход + выход)<input id="perDay" type="number" min="0" step="1"></label>
+      <label>Торговых дней в месяц<input id="days" type="number" min="1" max="31" step="1"></label>
+      <label>Лимитных ордеров (мейкер): <b id="mkOut"></b><input id="maker" type="range" min="0" max="100" step="5"></label>
+      <label>Спред + проскальзывание, % на сторону<input id="slip" type="number" min="0" step="0.01" title="Невидимая часть расходов: разница между покупкой и продажей и сдвиг цены при исполнении"></label>
+      <label class="chk"><input type="checkbox" id="bnb"> скидка за BNB (Binance)</label>
+    </div>
+    <div class="hint" style="margin-top:10px">«Сделка» = открыть и закрыть позицию, то есть два ордера. На фьючерсах комиссия берётся с <b>полного размера позиции</b> (деньги × плечо), а не с вашего депозита.</div>
+  </section>
+
+  <section class="big">
+    <div class="stat"><div class="v" id="bPer">—</div><div class="k">одна сделка (самая дешёвая биржа)</div></div>
+    <div class="stat"><div class="v warn" id="bMonth">—</div><div class="k">в месяц</div></div>
+    <div class="stat"><div class="v bad" id="bYear">—</div><div class="k">в год</div></div>
+    <div class="stat"><div class="v bad" id="bNeed">—</div><div class="k">нужно заработать за месяц от суммы сделки, чтобы просто выйти в ноль</div></div>
+  </section>
+
+  <section class="card">
+    <table>
+      <thead><tr><th>Биржа</th><th class="num">Ставка (мейкер / тейкер)</th><th class="num">Сделка</th><th class="num">День</th><th class="num">Месяц</th><th class="num">Год</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="hint" style="margin-top:8px">В расчёт входят торговая комиссия и спред/проскальзывание. Не входят: фандинг на фьючерсах, комиссии за ввод/вывод, налоги.</div>
+  </section>
+
+  <section class="card">
+    <b>Базовые ставки, которые использует калькулятор</b> <span class="hint">(обычный пользователь без VIP-уровня; проверено 07.10.2026 — биржи периодически меняют ставки, сверяйтесь с их официальными страницами комиссий)</span>
+    <table class="rates" style="margin-top:8px">
+      <thead><tr><th>Биржа</th><th class="num">Спот мейкер</th><th class="num">Спот тейкер</th><th class="num">Фьючерсы мейкер</th><th class="num">Фьючерсы тейкер</th></tr></thead>
+      <tbody id="rates"></tbody>
+    </table>
+  </section>
+
+  <section class="cta">
+    <div class="card">
+      <h3>📡 Сигналы каждый час — бесплатно</h3>
+      <p>Бот сам сканирует Bybit, Binance и OKX и публикует аномалии фандинга и расхождения цен в Telegram.</p>
+      <a class="btn tg" id="tgLink" target="_blank" rel="noopener">Открыть Telegram-канал</a>
+    </div>
+    <div class="card">
+      <h3>🔺 Сканеры арбитража</h3>
+      <p>Проверьте, сколько «бесплатных» расхождений между биржами переживает комиссии, которые вы только что посчитали.</p>
+      <a class="btn sc" href="cross.html">Открыть межбиржевой сканер</a>
+    </div>
+  </section>
+</main>
+<footer>Расчёт ориентировочный и не является инвестиционной рекомендацией. Фактические комиссии зависят от вашего VIP-уровня, страны, торговой пары и акций бирж.</footer>
+
+<script>
+// ===== Базовые ставки, % (обычный пользователь). Обновляйте при изменениях бирж. =====
+const TG_URL = "https://t.me/kissan_radarbot";
+const RATES = {
+  Bybit:   { spot: [0.10, 0.10],  fut: [0.02, 0.055] },
+  Binance: { spot: [0.10, 0.10],  fut: [0.02, 0.05], bnbSpot: 0.75, bnbFut: 0.90 },
+  OKX:     { spot: [0.08, 0.10],  fut: [0.02, 0.05] },
+};
+
+// стоимость одной сделки (вход + выход) в $
+function tradeCost(ex, c) {
+  const r = RATES[ex][c.mkt];
+  let k = 1;
+  if (ex === "Binance" && c.bnb) k = c.mkt === "spot" ? RATES.Binance.bnbSpot : RATES.Binance.bnbFut;
+  const blended = (c.maker / 100 * r[0] + (1 - c.maker / 100) * r[1]) * k;   // % на сторону
+  const notional = c.size * (c.mkt === "fut" ? c.lev : 1);
+  return notional * 2 * (blended + c.slip) / 100;
+}
+
+if (typeof document !== "undefined") (function () {
+  const $ = id => document.getElementById(id);
+  const KEY = "feesCfg";
+  const DEF = { mkt: "spot", size: 1000, lev: 10, perDay: 5, days: 30, maker: 0, slip: 0, bnb: false };
+  let c = Object.assign({}, DEF);
+  try { Object.assign(c, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+
+  const money = v => (v >= 10000 ? Math.round(v).toLocaleString("ru-RU") : v.toLocaleString("ru-RU", { maximumFractionDigits: 2 })) + " $";
+
+  function read() {
+    for (const k of ["size", "lev", "perDay", "days", "maker", "slip"]) {
+      const v = parseFloat($(k).value); c[k] = Number.isFinite(v) && v >= 0 ? v : DEF[k];
+    }
+    c.lev = Math.max(1, c.lev); c.bnb = $("bnb").checked;
+    try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {}
+  }
+  function fill() {
+    for (const k of ["size", "lev", "perDay", "days", "maker", "slip"]) $(k).value = c[k];
+    $("bnb").checked = c.bnb;
+    document.querySelectorAll("#mkt button").forEach(b => b.classList.toggle("on", b.dataset.v === c.mkt));
+  }
+  function render() {
+    $("mkOut").textContent = c.maker + "%";
+    $("levWrap").style.opacity = c.mkt === "fut" ? 1 : .4;
+    $("lev").disabled = c.mkt !== "fut";
+    const rows = Object.keys(RATES).map(ex => {
+      const t = tradeCost(ex, c), d = t * c.perDay, m = d * c.days;
+      return { ex, t, d, m, y: m * 12, r: RATES[ex][c.mkt] };
+    });
+    const best = rows.reduce((a, b) => b.t < a.t ? b : a);
+    const minT = best.t, cheap = rows.filter(r => Math.abs(r.t - minT) < 1e-9);
+    const unique = cheap.length === 1;
+    const maxM = Math.max(...rows.map(r => r.m)) || 1;
+    $("tbody").innerHTML = rows.map(r => `<tr class="${unique && r === best ? "best" : ""}">
+      <td><b>${r.ex}</b>${unique && r === best ? '<span class="tag">дешевле</span>' : ""}<div class="bar" style="width:${r.m / maxM * 100}%"></div></td>
+      <td class="num">${r.r[0]}% / ${r.r[1]}%${r.ex === "Binance" && c.bnb ? " <span class='hint'>−BNB</span>" : ""}</td>
+      <td class="num">${money(r.t)}</td><td class="num">${money(r.d)}</td>
+      <td class="num"><b>${money(r.m)}</b></td><td class="num">${money(r.y)}</td></tr>`).join("");
+    $("bPer").textContent = money(best.t);
+    $("bMonth").textContent = money(best.m);
+    $("bYear").textContent = money(best.y);
+    $("bNeed").textContent = (c.size > 0 ? (best.m / c.size * 100).toFixed(0) : "—") + "%";
+  }
+  $("rates").innerHTML = Object.entries(RATES).map(([ex, r]) =>
+    `<tr><td>${ex}</td><td class="num">${r.spot[0]}%</td><td class="num">${r.spot[1]}%</td><td class="num">${r.fut[0]}%</td><td class="num">${r.fut[1]}%</td></tr>`).join("") +
+    `<tr><td colspan="5" class="hint">Binance: оплата комиссии в BNB даёт −25% на споте и −10% на фьючерсах.</td></tr>`;
+  document.querySelectorAll("input").forEach(el => el.addEventListener("input", () => { read(); render(); }));
+  document.querySelectorAll("#mkt button").forEach(b => b.onclick = () => { c.mkt = b.dataset.v; fill(); read(); render(); });
+  $("tgLink").href = TG_URL;
+  fill(); render();
+})();
+</script>
+</body>
+</html>
